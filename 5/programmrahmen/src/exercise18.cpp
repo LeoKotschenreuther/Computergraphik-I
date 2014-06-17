@@ -180,6 +180,17 @@ void Exercise18::drawFaceNormals()
     for(; i != iEnd; ++i)
     {
         //TODO
+        QVector3D v0 = i->he->vertex[0];
+        QVector3D v1 = i->he->vertex[1];
+        QVector3D v2 = i->he->vertex[2];
+        float middle[3];
+        middle[0] = (v0.x()+v1.x()+v2.x())/3;
+        middle[1] = (v0.y()+v1.y()+v2.y())/3;
+        middle[2] = (v0.z()+v1.z()+v2.z())/3;
+
+//        glNormal3f(middle[0], middle[1], middle[2]);
+//        glVertex3f(middle[0], middle[1], middle[2]);
+//        glVertex3f(i->normal.x(), i->normal.y(), i->normal.z());
     }
 
     glEnd();
@@ -201,6 +212,11 @@ void Exercise18::drawVertexNormals()
     for(; i != iEnd; ++i)
     {
         //TODO
+        for(int j = 0; j < 3; j++){
+//            glVertex3f(i->vertex[j].x(), i->vertex[j].y(), i->vertex[j].z());
+//            glVertex3f(0,0,0);
+//            glVertex3f(i->face->normal.x(), i->face->normal.y(), i->face->normal.z());
+        }
     }
 
     glEnd();
