@@ -1,0 +1,4 @@
+*.zip
+
+build
+common.cmake.user
