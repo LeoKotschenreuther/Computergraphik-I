@@ -121,6 +121,6 @@ void HalfEdgeStructure::calculatePerVertexNormals(const float threshold)
         //TODO
         QVector3D thisNormal = m_halfEdges[i].face->normal;
         HalfEdge *opp = m_halfEdges[i].opp;
-        Face **oppFace = &opp->face;
+//        Face **oppFace = &opp->face;
     }
 }
