@@ -103,17 +103,17 @@ void HalfEdgeStructure::calculatePerFaceNormals()
     {
         // calc face normal
         // TODO
-        QVector3D v0 = i->he->vertex[0];
-        QVector3D v1 = i->he->vertex[1];
-        QVector3D v2 = i->he->vertex[2];
+        QVector3D *v0 = i->he->vertex;
+        QVector3D *v1 = i->he->next->vertex;
+        QVector3D *v2 = i->he->prev->vertex;
         QVector3D a;
-        a.setX(v1.x() - v0.x());
-        a.setY(v1.y() - v0.y());
-        a.setZ(v1.z() - v0.z());
+        a.setX(v1->x() - v0->x());
+        a.setY(v1->y() - v0->y());
+        a.setZ(v1->z() - v0->z());
         QVector3D b;
-        b.setX(v2.x() - v0.x());
-        b.setY(v2.y() - v0.y());
-        b.setZ(v2.z() - v0.z());
+        b.setX(v2->x() - v0->x());
+        b.setY(v2->y() - v0->y());
+        b.setZ(v2->z() - v0->z());
         i->normal = QVector3D::normal(a, b);
     }
 }
@@ -121,6 +121,7 @@ void HalfEdgeStructure::calculatePerFaceNormals()
 void HalfEdgeStructure::calculatePerVertexNormals(const float threshold)
 {
     const int size(static_cast<int>(m_halfEdges.size()));
+    qDebug() << threshold;
 
     for(int i = 0; i < size; ++i)
     {
@@ -129,12 +130,21 @@ void HalfEdgeStructure::calculatePerVertexNormals(const float threshold)
         QVector3D thisNormal = m_halfEdges[i].face->normal;
         if(m_halfEdges[i].opp){
             QVector3D *oppNormal = &m_halfEdges[i].opp->face->normal;
-//            m_halfEdges[i].normal.setX(threshold * 0.5f * (thisNormal.x()+oppNormal->x()));
-//            m_halfEdges[i].normal.setY(threshold * 0.5f * (thisNormal.y()+oppNormal->y()));
-//            m_halfEdges[i].normal.setZ(threshold * 0.5f * (thisNormal.z()+oppNormal->z()));
+            float angle = cosh(QVector3D::dotProduct(thisNormal, *oppNormal) / (thisNormal.length() * oppNormal->length()));
+            if(_deg(angle) > threshold){
+                // hard edge
+                m_halfEdges[i].normal = thisNormal;
+            }
+            else{
+                // soft edge
+                m_halfEdges[i].normal.setX(0.5f * (thisNormal.x()+oppNormal->x()));
+                m_halfEdges[i].normal.setY(0.5f * (thisNormal.y()+oppNormal->y()));
+                m_halfEdges[i].normal.setZ(0.5f * (thisNormal.z()+oppNormal->z()));
+            }
         }
-//        else{
-//            m_halfEdges[i].normal = m_halfEdges[i].face->normal;
-//        }
+        else{
+            // I don't know why, but sometimes there exists no opposite haldEdge!!!
+            m_halfEdges[i].normal = thisNormal;
+        }
     }
 }
