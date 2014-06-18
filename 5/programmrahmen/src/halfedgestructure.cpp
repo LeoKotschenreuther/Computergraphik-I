@@ -126,21 +126,79 @@ void HalfEdgeStructure::calculatePerVertexNormals(const float threshold)
     for(int i = 0; i < size; ++i)
     {
         //TODO
-        QVector3D avgNormal;
+        int nFaces = 0;
         QVector3D thisNormal = m_halfEdges[i].face->normal;
+        HalfEdge *thisHalfEdge = &m_halfEdges[i];
+        HalfEdge * he = NULL;
         if(m_halfEdges[i].opp){
-            QVector3D *oppNormal = &m_halfEdges[i].opp->face->normal;
-            float angle = cosh(QVector3D::dotProduct(thisNormal, *oppNormal) / (thisNormal.length() * oppNormal->length()));
-            if(_deg(angle) > threshold){
-                // hard edge
-                m_halfEdges[i].normal = thisNormal;
+             QVector3D *oppNormal = &m_halfEdges[i].opp->face->normal;
+
+            HalfEdge *temp = m_halfEdges[i].opp->next;
+            QVector3D avgNormal = thisNormal;
+            while (temp != thisHalfEdge  && he == NULL) {
+//                qDebug() << "first While";
+                float angle = _acosd(QVector3D::dotProduct(thisNormal, temp->face->normal));
+
+                if(angle > threshold){
+                    // hard edge
+                    m_halfEdges[i].normal = thisNormal;
+                }
+                else{
+                    // soft edge
+//                    m_halfEdges[i].normal.setX(0.5f * (thisNormal.x()+oppNormal->x()));
+//                    m_halfEdges[i].normal.setY(0.5f * (thisNormal.y()+oppNormal->y()));
+//                    m_halfEdges[i].normal.setZ(0.5f * (thisNormal.z()+oppNormal->z()));
+
+                    avgNormal = (avgNormal * (nFaces++) + temp->face->normal) / nFaces;
+                }
+                if (temp -> opp != NULL) {
+                    temp = temp->opp->next;
+                } else {
+                    he = temp;
+                }
+
             }
-            else{
-                // soft edge
-                m_halfEdges[i].normal.setX(0.5f * (thisNormal.x()+oppNormal->x()));
-                m_halfEdges[i].normal.setY(0.5f * (thisNormal.y()+oppNormal->y()));
-                m_halfEdges[i].normal.setZ(0.5f * (thisNormal.z()+oppNormal->z()));
+            temp = m_halfEdges[i].prev->opp;
+            while (temp != NULL && he != NULL && temp != he) {
+//                qDebug() << "second While";
+                float angle = _acosd(QVector3D::dotProduct(thisNormal, temp->face->normal));
+
+                if(angle > threshold){
+                    // hard edge
+                    m_halfEdges[i].normal = thisNormal;
+                }
+                else{
+                    // soft edge
+//                    m_halfEdges[i].normal.setX(0.5f * (thisNormal.x()+oppNormal->x()));
+//                    m_halfEdges[i].normal.setY(0.5f * (thisNormal.y()+oppNormal->y()));
+//                    m_halfEdges[i].normal.setZ(0.5f * (thisNormal.z()+oppNormal->z()));
+
+                    avgNormal = (avgNormal * (nFaces++) + temp->face->normal) / nFaces;
+                }
+                if (temp -> prev -> opp != NULL) {
+                    temp = temp->prev->opp;
+                } else {
+                    break;
+                    qDebug () << "nicht beide Richtunge geschafft";
+                }
             }
+
+//            qDebug () << "temp == he";
+
+
+            m_halfEdges[i].normal = avgNormal;
+
+//            qDebug() << angle << threshold;
+//            if(angle > threshold){
+//                // hard edge
+//                m_halfEdges[i].normal = thisNormal;
+//            }
+//            else{
+//                // soft edge
+//                m_halfEdges[i].normal.setX(0.5f * (thisNormal.x()+oppNormal->x()));
+//                m_halfEdges[i].normal.setY(0.5f * (thisNormal.y()+oppNormal->y()));
+//                m_halfEdges[i].normal.setZ(0.5f * (thisNormal.z()+oppNormal->z()));
+//            }
         }
         else{
             // I don't know why, but sometimes there exists no opposite haldEdge!!!
