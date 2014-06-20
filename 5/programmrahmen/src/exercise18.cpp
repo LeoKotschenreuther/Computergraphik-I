@@ -221,14 +221,12 @@ void Exercise18::drawVertexNormals()
     {
 //        printf ("todo");
         //TODO
-        for(int j = 0; j < 3; j++){
-            QVector3D v = i->vertex[j];
-//            printf ("for");
-            glVertex3f(v.x(), v.y(), v.z());
+        QVector3D v = i->vertex[0];
+//        printf ("for");
+        glVertex3f(v.x(), v.y(), v.z());
 
-            v += i->normal /10 ;
-            glVertex3f(v.x(), v.y(), v.z());
-        }
+        v += i->normal /10 ;
+        glVertex3f(v.x(), v.y(), v.z());
     }
 
     glEnd();

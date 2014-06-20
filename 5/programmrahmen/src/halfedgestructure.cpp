@@ -126,12 +126,12 @@ void HalfEdgeStructure::calculatePerVertexNormals(const float threshold)
     for(int i = 0; i < size; ++i)
     {
         //TODO
-        int nFaces = 0;
+        int nFaces = 1;
         QVector3D thisNormal = m_halfEdges[i].face->normal;
         HalfEdge *thisHalfEdge = &m_halfEdges[i];
         HalfEdge * he = NULL;
         if(m_halfEdges[i].opp){
-             QVector3D *oppNormal = &m_halfEdges[i].opp->face->normal;
+            QVector3D *oppNormal = &m_halfEdges[i].opp->face->normal;
 
             HalfEdge *temp = m_halfEdges[i].opp->next;
             QVector3D avgNormal = thisNormal;
@@ -148,7 +148,6 @@ void HalfEdgeStructure::calculatePerVertexNormals(const float threshold)
 //                    m_halfEdges[i].normal.setX(0.5f * (thisNormal.x()+oppNormal->x()));
 //                    m_halfEdges[i].normal.setY(0.5f * (thisNormal.y()+oppNormal->y()));
 //                    m_halfEdges[i].normal.setZ(0.5f * (thisNormal.z()+oppNormal->z()));
-
                     avgNormal = (avgNormal * (nFaces++) + temp->face->normal) / nFaces;
                 }
                 if (temp -> opp != NULL) {
@@ -202,6 +201,7 @@ void HalfEdgeStructure::calculatePerVertexNormals(const float threshold)
         }
         else{
             // I don't know why, but sometimes there exists no opposite haldEdge!!!
+//            qDebug() << "no opposite HalfEdge";
             m_halfEdges[i].normal = thisNormal;
         }
     }
