@@ -58,7 +58,7 @@ void endCallback(void)
 
     // Draw solid
 
-    glColor3f(0.7, 0.7, 0.7);
+    glColor3f(0.0, 0.8, 0.4);
 
     glBegin(g_primitive);
 
