@@ -14,7 +14,6 @@
 #include <QMouseEvent>
 #include <QWindow>
 
-
 // global state FTW
 
 std::list<Vertex> g_combinedVertices; // new vertices from tesselation (see combineCallback)
@@ -47,46 +46,46 @@ void vertexCallback(void * vdata)
 
 void combineCallback(double coords[3], double *vertex_data[4], float weight[4], double **dataOut)
 {
-	Vertex vertex(coords[0], coords[1], coords[2]);
-	g_combinedVertices.push_back(vertex);
-	Vertex &v = g_combinedVertices.back();
-	*dataOut = &v.x;
+    Vertex vertex(coords[0], coords[1], coords[2]);
+    g_combinedVertices.push_back(vertex);
+    Vertex &combinedVertext = g_combinedVertices.back();
+    *dataOut = &combinedVertext.x;
 }
 
 void endCallback(void)
 {
     glDisable(GL_LIGHTING);
 
-        // Draw solid
+    // Draw solid
 
-        glColor3f(0.7, 0.7, 0.7);
+    glColor3f(0.7, 0.7, 0.7);
 
-        glBegin(g_primitive);
+    glBegin(g_primitive);
 
-        for(unsigned int i=0; i<g_vertices.size(); i++) {
-            Vertex v = g_vertices[i];
-            glVertex3f(v.x, v.y, v.z);
-        }
+    for(unsigned int i=0; i<g_vertices.size(); i++) {
+        Vertex v = g_vertices[i];
+        glVertex3f(v.x, v.y, v.z);
+    }
 
-        glEnd();
+    glEnd();
 
 
-        // Draw triangle outlines
+    // Draw triangle outlines
 
-        glColor3f(0.9, 0.9, 0.9);
-        glLineWidth(1.0);
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glColor3f(0.9, 0.9, 0.9);
+    glLineWidth(1.0);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
-        glBegin(g_primitive);
+    glBegin(g_primitive);
 
-        for(unsigned int i=0; i<g_vertices.size(); i++) {
-            Vertex v = g_vertices[i];
-            glVertex3f(v.x, v.y, v.z + 0.01); // + 0.01 so it's guaranteed to be in front of the solid
-        }
+    for(unsigned int i=0; i<g_vertices.size(); i++) {
+        Vertex v = g_vertices[i];
+        glVertex3f(v.x, v.y, v.z + 0.01); // + 0.01 so it's guaranteed to be in front of the solid
+    }
 
-        glEnd();
+    glEnd();
 
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 
@@ -159,34 +158,33 @@ void Exercise19::drawContours()
 
 void Exercise19::tesselatePolygons()
 {
-    GLUtesselator *tess = gluNewTess();
+    GLUtesselator *tesselator = gluNewTess();
 
-        gluTessCallback(tess, GLU_TESS_ERROR,   (GLvoid(*)()) &errorCallback);
-        gluTessCallback(tess, GLU_TESS_BEGIN,   (GLvoid(*)()) &beginCallback);
-        gluTessCallback(tess, GLU_TESS_END,     (GLvoid(*)()) &endCallback);
-        gluTessCallback(tess, GLU_TESS_VERTEX,  (GLvoid(*)()) &vertexCallback);
-        gluTessCallback(tess, GLU_TESS_COMBINE, (GLvoid(*)()) &combineCallback);
+    gluTessCallback(tesselator, GLU_TESS_ERROR,   (GLvoid(*)()) &errorCallback);
+    gluTessCallback(tesselator, GLU_TESS_BEGIN,   (GLvoid(*)()) &beginCallback);
+    gluTessCallback(tesselator, GLU_TESS_END,     (GLvoid(*)()) &endCallback);
+    gluTessCallback(tesselator, GLU_TESS_VERTEX,  (GLvoid(*)()) &vertexCallback);
+    gluTessCallback(tesselator, GLU_TESS_COMBINE, (GLvoid(*)()) &combineCallback);
 
-        gluTessBeginPolygon(tess, NULL);
+    gluTessBeginPolygon(tesselator, NULL);
 
-        for (ContourList::iterator it = m_contours.begin(); it != m_contours.end(); ++it)
-        {
-            Contour & contour = *it;
-            if (contour.size() <= 2)
-                continue;
+    for (ContourList::iterator iterator = m_contours.begin(); iterator != m_contours.end(); ++iterator)
+    {
+        Contour & contour = *iterator;
+        if (contour.size() <= 2)
+            continue;
 
-            gluTessBeginContour(tess);
-            for (Contour::iterator cit = contour.begin(); cit != contour.end(); ++cit)
-                gluTessVertex(tess, &(cit->x), &(cit->x));
+        gluTessBeginContour(tesselator);
+        for (Contour::iterator contuorIterator = contour.begin(); contuorIterator != contour.end(); ++contuorIterator)
+            gluTessVertex(tesselator, &(contuorIterator->x), &(contuorIterator->x));
 
-            gluTessEndContour(tess);
-        }
+        gluTessEndContour(tesselator);
+    }
 
-        gluTessEndPolygon(tess);
-        gluDeleteTess(tess);
+    gluTessEndPolygon(tesselator);
+    gluDeleteTess(tesselator);
 
-        // Release newly allocated vertices
-        g_combinedVertices.clear();
+    g_combinedVertices.clear();
 }
 
 void Exercise19::mouseReleaseEvent(QMouseEvent * mouseEvent)
