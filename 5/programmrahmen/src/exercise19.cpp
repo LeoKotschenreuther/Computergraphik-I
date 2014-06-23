@@ -33,12 +33,16 @@ void errorCallback(GLenum errorCode)
 
 void beginCallback(GLenum primitive)
 {
-    //TODO
+    glBegin(primitive);
+    g_primitive = primitive;
+    g_vertices.clear();
 }
 
 void vertexCallback(void * vdata)
 {
-    //TODO
+    double* vertexdata = static_cast<double*>(vdata);
+    Vertex newVertex(vertexdata[0], vertexdata[1], vertexdata[2]);
+    g_vertices.push_back(newVertex);
 }
 
 void combineCallback(double coords[3], double *vertex_data[4], float weight[4], double **dataOut)
@@ -51,7 +55,38 @@ void combineCallback(double coords[3], double *vertex_data[4], float weight[4], 
 
 void endCallback(void)
 {
-    //TODO
+    glDisable(GL_LIGHTING);
+
+        // Draw solid
+
+        glColor3f(0.7, 0.7, 0.7);
+
+        glBegin(g_primitive);
+
+        for(unsigned int i=0; i<g_vertices.size(); i++) {
+            Vertex v = g_vertices[i];
+            glVertex3f(v.x, v.y, v.z);
+        }
+
+        glEnd();
+
+
+        // Draw triangle outlines
+
+        glColor3f(0.9, 0.9, 0.9);
+        glLineWidth(1.0);
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+        glBegin(g_primitive);
+
+        for(unsigned int i=0; i<g_vertices.size(); i++) {
+            Vertex v = g_vertices[i];
+            glVertex3f(v.x, v.y, v.z + 0.01); // + 0.01 so it's guaranteed to be in front of the solid
+        }
+
+        glEnd();
+
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 }
 
 
@@ -70,8 +105,8 @@ void Exercise19::paintGL()
 	glPushMatrix();
 
     //TODO use these
-    //drawContours();
-    //tesselatePolygons();
+    drawContours();
+    tesselatePolygons();
 
 	glPopMatrix();
 }
@@ -124,7 +159,34 @@ void Exercise19::drawContours()
 
 void Exercise19::tesselatePolygons()
 {
-    //TODO
+    GLUtesselator *tess = gluNewTess();
+
+        gluTessCallback(tess, GLU_TESS_ERROR,   (GLvoid(*)()) &errorCallback);
+        gluTessCallback(tess, GLU_TESS_BEGIN,   (GLvoid(*)()) &beginCallback);
+        gluTessCallback(tess, GLU_TESS_END,     (GLvoid(*)()) &endCallback);
+        gluTessCallback(tess, GLU_TESS_VERTEX,  (GLvoid(*)()) &vertexCallback);
+        gluTessCallback(tess, GLU_TESS_COMBINE, (GLvoid(*)()) &combineCallback);
+
+        gluTessBeginPolygon(tess, NULL);
+
+        for (ContourList::iterator it = m_contours.begin(); it != m_contours.end(); ++it)
+        {
+            Contour & contour = *it;
+            if (contour.size() <= 2)
+                continue;
+
+            gluTessBeginContour(tess);
+            for (Contour::iterator cit = contour.begin(); cit != contour.end(); ++cit)
+                gluTessVertex(tess, &(cit->x), &(cit->x));
+
+            gluTessEndContour(tess);
+        }
+
+        gluTessEndPolygon(tess);
+        gluDeleteTess(tess);
+
+        // Release newly allocated vertices
+        g_combinedVertices.clear();
 }
 
 void Exercise19::mouseReleaseEvent(QMouseEvent * mouseEvent)
