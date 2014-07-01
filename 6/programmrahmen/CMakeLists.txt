@@ -28,8 +28,6 @@ set(sources
     src/mainwindow.cpp
     src/mainwindow.h
     src/mathmacros.h
-    src/shaderutils.h
-    src/shaderutils.cpp
     src/abstractexercise.cpp
     src/abstractexercise.h
     src/abstractGLexercise.cpp

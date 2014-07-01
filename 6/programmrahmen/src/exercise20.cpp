@@ -6,7 +6,6 @@
 #include "halfedgestructure.h"
 #include "vertexreuse.h"
 #include "objio.h"
-#include "shaderutils.h"
 
 Exercise20::Exercise20(QWidget  * parent)
 :   AbstractGLExercise(parent)
@@ -21,20 +20,18 @@ Exercise20::Exercise20(QWidget  * parent)
     ,   QVector3D( 0.f, 0.f,  0.f)
     ,   QVector3D( 0.f, 1.f,  0.f));
 
-    m_progs = new GLuint[NumShadingModes];
-    for(int i=0; i<NumShadingModes; i++)
-    {
-        m_progs[i] = -1;
-    }
+	m_prog_toon = new QGLShaderProgram;
+	m_prog_phong = new QGLShaderProgram;
 
-    setupLight();
+	setupLight();
     setupMaterials();
 }
 
 Exercise20::~Exercise20()
 {
     delete m_materials;
-    delete m_progs;
+    delete m_prog_toon;
+	delete m_prog_phong;
     delete m_drawable;
     delete m_he;
 }
@@ -158,32 +155,21 @@ void Exercise20::setupMaterials()
     m_materials[Chrome].m_shininess = 0.6f;
 }
 
-void Exercise20::setupLightUniforms(GLuint prog)
+void Exercise20::setupLightUniforms(QGLShaderProgram* prog)
 {
-    GLint loc;
-    if( (loc = get_uniform(prog, "light_pos")) != -1 )
-        glUniform4fv(loc, 1, m_lighting.m_pos);
-    if( (loc = get_uniform(prog, "light_iAmbient")) != -1 )
-        glUniform4fv(loc, 1, m_lighting.m_iAmbient);
-    if( (loc = get_uniform(prog, "light_iDiffuse")) != -1 )
-        glUniform4fv(loc, 1, m_lighting.m_iDiffuse);
-    if( (loc = get_uniform(prog, "light_iSpecular")) != -1 )
-        glUniform4fv(loc, 1, m_lighting.m_iSpecular);
+	prog->setUniformValue("light_pos", QVector4D(m_lighting.m_pos[0], m_lighting.m_pos[1], m_lighting.m_pos[2], m_lighting.m_pos[3]));
+	prog->setUniformValue("light_iAmbient", QVector4D(m_lighting.m_iAmbient[0], m_lighting.m_iAmbient[1], m_lighting.m_iAmbient[2], m_lighting.m_iAmbient[3]));
+	prog->setUniformValue("light_iDiffuse", QVector4D(m_lighting.m_iDiffuse[0], m_lighting.m_iDiffuse[1], m_lighting.m_iDiffuse[2], m_lighting.m_iDiffuse[3]));
+	prog->setUniformValue("light_iSpecular", QVector4D(m_lighting.m_iSpecular[0], m_lighting.m_iSpecular[1], m_lighting.m_iSpecular[2], m_lighting.m_iSpecular[3]));
 }
 
-void Exercise20::setupMaterialUniforms(GLuint prog)
+void Exercise20::setupMaterialUniforms(QGLShaderProgram* prog)
 {
-    GLint loc;
-    if( (loc = get_uniform(prog, "material_ambient")) != -1 )
-        glUniform4fv(loc, 1, m_materials[m_materialMode].m_kAmbient);
-    if( (loc = get_uniform(prog, "material_diffuse")) != -1 )
-        glUniform4fv(loc, 1, m_materials[m_materialMode].m_kDiffuse);
-    if( (loc = get_uniform(prog, "material_specular")) != -1 )
-        glUniform4fv(loc, 1, m_materials[m_materialMode].m_kSpecular);
-    if( (loc = get_uniform(prog, "material_emission")) != -1 )
-        glUniform4fv(loc, 1, m_materials[m_materialMode].m_kEmission);
-    if( (loc = get_uniform(prog, "material_shininess")) != -1 )
-        glUniform1f(loc, m_materials[m_materialMode].m_shininess);
+	prog->setUniformValue("material_ambient", QVector4D(m_materials[m_materialMode].m_kAmbient[0], m_materials[m_materialMode].m_kAmbient[1], m_materials[m_materialMode].m_kAmbient[2], m_materials[m_materialMode].m_kAmbient[3]));
+	prog->setUniformValue("material_diffuse", QVector4D(m_materials[m_materialMode].m_kDiffuse[0], m_materials[m_materialMode].m_kDiffuse[1], m_materials[m_materialMode].m_kDiffuse[2], m_materials[m_materialMode].m_kDiffuse[3]));
+	prog->setUniformValue("material_specular", QVector4D(m_materials[m_materialMode].m_kSpecular[0], m_materials[m_materialMode].m_kSpecular[1], m_materials[m_materialMode].m_kSpecular[2], m_materials[m_materialMode].m_kSpecular[3]));
+	prog->setUniformValue("material_emission", QVector4D(m_materials[m_materialMode].m_kEmission[0], m_materials[m_materialMode].m_kEmission[1], m_materials[m_materialMode].m_kEmission[2], m_materials[m_materialMode].m_kEmission[3]));
+	prog->setUniformValue("material_shininess", m_materials[m_materialMode].m_shininess);
 }
 
 void Exercise20::initializeGL()
@@ -198,10 +184,21 @@ void Exercise20::initializeGL()
 void Exercise20::paintGL()
 {
     glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	
+	QGLShaderProgram* currentProg;
+	if (m_shadingMode == Toon_Shading)
+	{
+		currentProg = m_prog_toon;
+	}
+	else
+	{
+		currentProg = m_prog_phong;
+	}
 
-    glUseProgram(m_progs[m_shadingMode]);
-    setupLightUniforms(m_progs[m_shadingMode]);
-    setupMaterialUniforms(m_progs[m_shadingMode]);
+	currentProg->bind();
+
+    setupLightUniforms(currentProg);
+	setupMaterialUniforms(currentProg);
 
     glLoadMatrixf(m_view.data());
     
@@ -213,7 +210,7 @@ void Exercise20::paintGL()
     draw();
 
     glPopMatrix();
-    glUseProgram(0);
+	currentProg->release();
 }
 
 void Exercise20::draw()
@@ -289,20 +286,16 @@ void Exercise20::keyPressEvent(QKeyEvent* keyEvent)
 
 void Exercise20::loadToonProgram()
 {
-    if(m_progs[Toon_Shading] != -1)
-        delete_program(m_progs[Toon_Shading]);
-    if(!(m_progs[Toon_Shading] = create_program("../data/toon.vert", "../data/toon.frag")))
-    {
-        qDebug() << "Error on loading toon shaders!";
-    }
+    m_prog_toon->removeAllShaders();
+	m_prog_toon->addShaderFromSourceFile(QGLShader::Vertex, "../data/toon.vert");
+	m_prog_toon->addShaderFromSourceFile(QGLShader::Fragment, "../data/toon.frag");
+    m_prog_toon->link();
 }
 
 void Exercise20::loadPhongProgram()
 {
-    if(m_progs[Phong_Shading] != -1)
-        delete_program(m_progs[Phong_Shading]);
-    if(!(m_progs[Phong_Shading] = create_program("../data/phong.vert", "../data/phong.frag")))
-    {
-        qDebug() << "Error on loading phong shaders!";
-    }
+    m_prog_phong->removeAllShaders();
+	m_prog_phong->addShaderFromSourceFile(QGLShader::Vertex, "../data/phong.vert");
+	m_prog_phong->addShaderFromSourceFile(QGLShader::Fragment, "../data/phong.frag");
+    m_prog_phong->link();
 }

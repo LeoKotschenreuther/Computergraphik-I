@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include "abstractGLexercise.h"
@@ -6,6 +5,7 @@
 #include <math.h>
 #include <string>
 #include <vector>
+#include <QGLShaderProgram>
 
 class PolygonalDrawable;
 class HalfEdgeStructure;
@@ -47,16 +47,18 @@ protected:
     void loadToonProgram();
     void loadPhongProgram();
 
-    void setupLightUniforms(GLuint prog);
-    void setupMaterialUniforms(GLuint prog);
+	void setupLightUniforms(QGLShaderProgram* prog);
+	void setupMaterialUniforms(QGLShaderProgram* prog);
 
 protected:
     ShadingMode         m_shadingMode;
     MaterialMode        m_materialMode;
 
-    GLuint              *m_progs;
     MaterialDefinition  *m_materials;
     LightingDefinition  m_lighting;
     PolygonalDrawable   *m_drawable;
     HalfEdgeStructure   *m_he;
+	QGLShaderProgram	*m_prog_toon;
+	QGLShaderProgram	*m_prog_phong;
+
 };
