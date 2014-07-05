@@ -9,7 +9,7 @@
 // Diese Datei bearbeiten.
 //
 // Bearbeiter
-// Matr.-Nr: xxxxx
+// Matr.-Nr: 765 358
 // Matr.-Nr: xxxxx
 //
 // ======================================
@@ -183,6 +183,10 @@ void Exercise21::drawHeightFieldPoints()
             // TODO: Aufgabe 21
             // Visualize the height field using GL_POINTS.
             /////////////////////////////////////////////////////////////////////////////////////////////////
+            GLfloat pointVectorX = m_heightField [i] [j] [0];
+            GLfloat pointVectorY = m_heightField [i] [j] [1];
+            GLfloat pointVectorZ = m_heightField [i] [j] [2];
+            glVertex3f(pointVectorX, pointVectorY, pointVectorZ);
         }
     }
     glEnd();
@@ -203,6 +207,18 @@ void Exercise21::drawHeightFieldLines()
     // Make sure that if m_gridSize changes, the rendering results are still correct.
     /////////////////////////////////////////////////////////////////////////////////////////////////
 
+    for (int i = 0; i < sqrtGridSize; i++)
+    {
+        for (int j = 0; j < sqrtGridSize; j++)
+        {
+            GLfloat pointVectorX = m_heightField [i] [j] [0];
+            GLfloat pointVectorY = m_heightField [i] [j] [1];
+            GLfloat pointVectorZ = m_heightField [i] [j] [2];
+            glVertex3f(pointVectorX, pointVectorY, pointVectorZ);
+            glVertex3f(pointVectorX, 0, pointVectorZ);
+        }
+    }
+
     glEnd();
     glPopMatrix();
 }
@@ -212,8 +228,10 @@ void Exercise21::drawTriangulatedHeightField()
     glDisable(GL_CULL_FACE);
     glPushMatrix();
     glPolygonMode(GL_FRONT_AND_BACK,GL_LINE);
-
+    glBegin(GL_TRIANGLE_STRIP);
     glColor3f(1.f, 1.f, 1.f);
+
+    int direction = 1; //rechts, -1 wäre nach links
 
     int sqrtGridSize = qSqrt(m_gridSize);
 
@@ -223,6 +241,33 @@ void Exercise21::drawTriangulatedHeightField()
     // Make sure that if m_gridSize changes, the triangulation still works.
     /////////////////////////////////////////////////////////////////////////////////////////////////
 
+    for (int i = 0; i < sqrtGridSize; i++)
+    {
+        for (int j = 0; j < sqrtGridSize; j++)
+        {
+            int m_j;
+            if (direction < 0) {
+                m_j = sqrtGridSize - j;
+            } else {
+                m_j = j;
+            }
+            GLfloat pointVectorX = m_heightField [i] [m_j] [0];
+            GLfloat pointVectorY = m_heightField [i] [m_j] [1];
+            GLfloat pointVectorZ = m_heightField [i] [m_j] [2];
+            glVertex3f(pointVectorX, pointVectorY, pointVectorZ);
+
+            if (i+1 < sqrtGridSize) {
+                glVertex3f(m_heightField [i+1] [m_j] [0], m_heightField [i+1] [m_j] [1], m_heightField [i+1] [m_j] [2]);
+            } else {
+                glVertex3f(m_heightField [i] [m_j] [0], m_heightField [i] [m_j] [1], m_heightField [i] [m_j] [2]);
+            }
+        }
+        if (direction < 0) {
+            direction = 1;
+        } else {
+            direction = -1;
+        }
+    }
 
     glPopMatrix();
     glEnable(GL_CULL_FACE);
