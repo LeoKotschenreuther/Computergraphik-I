@@ -247,7 +247,7 @@ void Exercise21::drawTriangulatedHeightField()
         {
             int m_j;
             if (direction < 0) {
-                m_j = sqrtGridSize - j;
+                m_j = (sqrtGridSize-1) - j;
             } else {
                 m_j = j;
             }
@@ -298,7 +298,10 @@ void Exercise21::drawHeightFieldBezierPatch()
     // TODO: Aufgabe 21
     // Draw a *filled* bezier patch using the opengl evaluator
     /////////////////////////////////////////////////////////////////////////////////////////////////
+
     //glEvalMesh2();
+
+    glEvalMesh2(GL_FILL, 0, 20, 0, 20);
 
     glPopMatrix ();
     glDisable(GL_LIGHTING);
