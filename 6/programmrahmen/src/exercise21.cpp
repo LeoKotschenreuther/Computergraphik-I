@@ -268,6 +268,7 @@ void Exercise21::drawTriangulatedHeightField()
             direction = -1;
         }
     }
+    glEnd();
 
     glPopMatrix();
     glEnable(GL_CULL_FACE);
