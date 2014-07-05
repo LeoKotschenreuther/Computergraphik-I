@@ -299,9 +299,15 @@ void Exercise21::drawHeightFieldBezierPatch()
     // Draw a *filled* bezier patch using the opengl evaluator
     /////////////////////////////////////////////////////////////////////////////////////////////////
 
+    int sqrtGridSize = qSqrt(m_gridSize);
     //glEvalMesh2();
 
-    glEvalMesh2(GL_FILL, 0, 20, 0, 20);
+    glMap2f(GL_MAP2_VERTEX_3, 0,1,3,3, 0,1,9,3, (GLfloat *) m_heightField);
+    glEnable(GL_MAP2_VERTEX_3);
+    glEnable(GL_AUTO_NORMAL);
+    glMapGrid2f(sqrtGridSize,0,sqrtGridSize,sqrtGridSize,0,sqrtGridSize);
+
+    glEvalMesh2(GL_FILL, 0, 1, 0, 1);
 
     glPopMatrix ();
     glDisable(GL_LIGHTING);
