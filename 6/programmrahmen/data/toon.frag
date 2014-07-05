@@ -45,13 +45,22 @@ void main()
         color = vec4(0.0, 0.0, 0.0, 1.0);
     }
     else if(intensity > 0.0f && intensity <= 0.33){
-        color = vec4(0.8/3, 0.0, 0.0, 1.0);
+        color.x = baseColor.x / 3;
+        color.y = baseColor.y / 3;
+        color.z = baseColor.z / 3;
+        color.w = baseColor.w / 3;
     }
     else if(intensity > 0.33f && intensity <= 0.66){
-        color = vec4(0.8/3*2, 0.0, 0.0, 1.0);
+        color.x = baseColor.x / 3 * 2;
+        color.y = baseColor.y / 3 * 2;
+        color.z = baseColor.z / 3 * 2;
+        color.w = baseColor.w / 3 * 2;
     }
     else if(intensity > 0.66f && intensity <= 0.99){
-        color = vec4(0.8/3*3, 0.0, 0.0, 1.0);
+        color.x = baseColor.x;
+        color.y = baseColor.y;
+        color.z = baseColor.z;
+        color.w = baseColor.w;
     }
     else if(intensity > 0.99f){
         color = vec4(1.0, 1.0, 1.0, 1.0);
