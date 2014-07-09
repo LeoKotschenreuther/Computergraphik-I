@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#define SIZE 8 // max value: 10
+#define SIZE 10 // max value: 10
 
 class Exercise21 : public AbstractGLExercise
 {

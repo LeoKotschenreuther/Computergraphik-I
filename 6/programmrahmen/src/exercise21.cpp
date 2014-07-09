@@ -231,7 +231,7 @@ void Exercise21::drawTriangulatedHeightField()
     glBegin(GL_TRIANGLE_STRIP);
     glColor3f(1.f, 1.f, 1.f);
 
-    int direction = 1; //rechts, -1 wäre nach links
+    int direction = 1; //one direction, -1 would be opposite direction
 
     int sqrtGridSize = qSqrt(m_gridSize);
 
@@ -300,14 +300,13 @@ void Exercise21::drawHeightFieldBezierPatch()
     /////////////////////////////////////////////////////////////////////////////////////////////////
 
     float sqrtGridSize = qSqrt(m_gridSize);
-    //glEvalMesh2();
 
     glMap2f(GL_MAP2_VERTEX_3, 0,1, 3, sqrtGridSize, 0,1, 3*sqrtGridSize ,sqrtGridSize, (GLfloat *) m_heightField);
     glEnable(GL_MAP2_VERTEX_3);
     glEnable(GL_AUTO_NORMAL);
-    glMapGrid2f(8.0, 0.0, 1.0, 8.0, 0.0, 1.0);
+    glMapGrid2f(sqrtGridSize, 0.0, 1.0, sqrtGridSize, 0.0, 1.0);
 
-    glEvalMesh2(GL_FILL, 0, 1, 0, 1);
+    glEvalMesh2(GL_FILL, 0.0, sqrtGridSize, 0.0, sqrtGridSize);
 
     glPopMatrix ();
     glDisable(GL_LIGHTING);
